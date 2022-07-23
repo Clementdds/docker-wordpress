@@ -2,37 +2,54 @@ version: '3.7'
 
 services:
   nginx:
-    build: srcs/requirements/nginx
+    build: requirements/nginx
     container_name: nginx
     ports:
-      - "8080:80"
+      - "8080:8080"
     networks:
-      - docker-wordpress
+      - docker_wordpress
     restart: always
+    depends_on:
+      - wordpress
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME}
+    volumes:
+      - wordpress_data:/var/www/html/wordpress
 
   mariadb:
-    build: srcs/requirements/mariadb
+    image: mariadb:10.6.4-focal
     container_name: mariadb
     networks:
-      - docker-wordpress
+      - docker_wordpress
     volumes:
-      - mariadb_data:/path/in/container
+      - mariadb_data:/var/lib/mysql
     restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
 
   wordpress:
-    build: srcs/requirements/wordpress
+    image: wordpress:latest
     container_name: wordpress
     networks:
-      - docker-wordpress
+      - docker_wordpress
     volumes:
-      - wordpress_data:/path/in/container
+      - wordpress_data:/var/www/html/wordpress
     restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    depends_on:
+      - mariadb
 
 networks:
   docker_wordpress:
     name: docker-wordpress
 
 volumes:
-    wordpress_data:
-    mariadb_data:
-
+  wordpress_data:
+  mariadb_data:
