@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  nginx:
+    build: srcs/requirements/nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    networks:
+      - docker-wordpress
+    restart: always
+
+  mariadb:
+    build: srcs/requirements/mariadb
+    container_name: mariadb
+    networks:
+      - docker-wordpress
+    volumes:
+      - mariadb_data:/path/in/container
+    restart: always
+
+  wordpress:
+    build: srcs/requirements/wordpress
+    container_name: wordpress
+    networks:
+      - docker-wordpress
+    volumes:
+      - wordpress_data:/path/in/container
+    restart: always
+
+networks:
+  docker_wordpress:
+    name: docker-wordpress
+
+volumes:
+    wordpress_data:
+    mariadb_data:
+
